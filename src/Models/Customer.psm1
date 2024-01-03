@@ -10,8 +10,7 @@ class Customer : Entity {
 
     Customer([int] $id){
         $this.primaryKey = "Id"
-        $Customer = $this.select(@{"Where" = @("Id="+$id)})
-        $this.morph($Customer)
+        $this.select(@{"Where" = @("Id="+$id)})
     }
     
     Customer(){

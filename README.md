@@ -15,6 +15,8 @@ using module .\src\Database.psm1
 
 [Database]::SqlInstance = 'TEST-SQL\INSTDB01'
 [Database]::SqlDatabase = 'Test'
+[Database]::Password = ''
+[Database]::Username = ''
 ```
 
 Either by getting it from the config.json file with this code
@@ -57,3 +59,5 @@ $c.update()
 # Delete the first customer
 $c.delete()
 ```
+
+You can also check the exemple.ps1 file at the root of the project

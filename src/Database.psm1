@@ -2,6 +2,8 @@ class Database {
     
     static [string] $SqlInstance
     static [string] $SqlDatabase
+    static [string] $Username
+    static [string] $Password
 
     <#
     .SYNOPSIS
@@ -12,6 +14,8 @@ class Database {
             $json = Get-Content -Path '..\config.json' | ConvertFrom-Json 
             [Database]::SqlInstance = $json.SqlInstance
             [Database]::SqlDatabase = $json.SqlDatabase
+            [Database]::SqlInstance = $json.Username
+            [Database]::SqlDatabase = $json.Password
         }catch {
             return $false
         }
@@ -26,6 +30,15 @@ class Database {
         $inst = [Database]::SqlInstance
         $dbName = [Database]::SqlDatabase
         if($null -ne $inst -and "" -ne $inst -and $null -ne $dbName -and "" -ne $dbName){
+            return $true
+        }
+        return $false
+    }
+
+    static [bool] userInformationsFilled(){
+        $user = [Database]::Username
+        $userpwd = [Database]::Password
+        if($null -ne $user -and "" -ne $user -and $null -ne $userpwd -and "" -ne $userpwd){
             return $true
         }
         return $false
@@ -54,6 +67,11 @@ class Database {
         $inst = [Database]::SqlInstance
         $db = [Database]::SqlDatabase
         if([Database]::connectionDataFilled()){
+            if([Database]::userInformationsFilled()){
+                $user = [Database]::Username
+                $userpwd = [Database]::Password
+                return Invoke-Sqlcmd -ServerInstance $inst -Database $db -Query $sql -Username $user -Password $userpwd -TrustServerCertificate
+            }
             return Invoke-Sqlcmd -ServerInstance $inst -Database $db -Query $sql
         }
         return $null

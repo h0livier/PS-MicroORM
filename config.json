@@ -1,4 +1,6 @@
 {
     "SQLInstance": "TEST-SQL\\INSTDB01",
-    "SQLDatabase": "Test"
+    "SQLDatabase": "Test",
+    "Username": "",
+    "Password": ""
 }

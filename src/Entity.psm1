@@ -51,7 +51,7 @@ class Entity {
         Represents the options given to make the SQL instruction 
         Can contain joins and where options
     #>
-    static [array] select([string] $tableName, [array] $attributes, [hashtable] $options){
+    static [object] select([string] $tableName, [array] $attributes, [hashtable] $options){
         $attributes = if($options.Keys -contains "attributes") {$options["attributes"]} else {$attributes}
         $where = if($options.Keys -contains "where") {$options["where"]} else {@()}
         $joins = if($options.Keys -contains "joins") {
@@ -60,14 +60,15 @@ class Entity {
             }
             $options["joins"]
         } else {@()}
-        $query = "SELECT " + ($attributes -join ", ") + " FROM " +$tableName
+        $query = "SELECT " + ($attributes -join ", ") + " FROM [" +$tableName +"]"
         if($joins.Count -ne 0){
             $query += " INNER JOIN " + ($joins -join " INNER JOIN ")
         }
         if($where.Count -ne 0){
             $query += " WHERE " + ($where -join " AND ")
         }
-        return [Database]::query($query)
+        $queryRes = [Database]::query($query)
+        return $queryRes
     }
 
     <#
@@ -76,8 +77,9 @@ class Entity {
     .PARAMETER options
         Represents the options given to make the SQL instruction
     #>
-    [Object] select([hashtable]$options = @{}){
-        return [Entity]::select($this.tableName, $this.baseColumns, $options)
+    [void] select([hashtable]$options = @{}){
+        $object = [Entity]::select($this.tableName, $this.baseColumns, $options)
+        $this.morph($object)
     }
 
     <#
@@ -85,7 +87,7 @@ class Entity {
         Constructs a SQL insert instruction from entity object instance
     #>
     [void] insert(){
-        $query = "INSERT INTO "+ $this.tableName +""
+        $query = "INSERT INTO ["+ $this.tableName +"] "
         $columns = @()
         $values = @()
         foreach($item in $this.baseColumns){
@@ -114,7 +116,7 @@ class Entity {
         Represents the options used to filter on which lines the update has to be applied
     #>
     [void] update(){
-        $query = "UPDATE "+ $this.tableName +" SET "
+        $query = "UPDATE ["+ $this.tableName +"] SET "
         $vals = @()
         foreach($item in $this.baseColumns){
             if($item -ne $this.primaryKey){
@@ -143,8 +145,8 @@ class Entity {
     }
 
     [void] delete(){
-        $query = 'DELETE from '+ $this.tableName +' WHERE '
         $pk = $this.primaryKey
+        $query = 'DELETE from ['+ $this.tableName +'] WHERE '
         $query += $pk+"="+$this.$pk
         [Database]::query($query)
     }

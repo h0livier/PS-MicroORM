@@ -61,12 +61,12 @@ class Entity {
             }
             $options["joins"]
         } else {@()}
-        $query = "SELECT " + [Utils]::arrayCharacterFormatted($attributes, ", ") + " FROM " +$tableName
+        $query = "SELECT " + ($attributes -join ", ") + " FROM " +$tableName
         if($joins.Count -ne 0){
-            $query += " INNER JOIN " + [Utils]::arrayCharacterFormatted($joins, " INNER JOIN ")
+            $query += " INNER JOIN " + ($joins -join " INNER JOIN ")
         }
         if($where.Count -ne 0){
-            $query += " WHERE " + [Utils]::arrayCharacterFormatted($where, " AND ")
+            $query += " WHERE " + ($where -join " AND ")
         }
         return [Database]::query($query)
     }
@@ -103,8 +103,8 @@ class Entity {
                 }
             }
         }
-        $query += "("+[Utils]::arrayCharacterFormatted($columns, ", ")+") "
-        $query += "values("+[Utils]::arrayCharacterFormatted($values, ", ")+")"
+        $query += "("+($columns -join ", ")+") "
+        $query += "values("+($values -join ", ")+")"
         [Database]::query($query)
     }
 
@@ -133,12 +133,12 @@ class Entity {
                 $vals += $line
             }
         }
-        $query += [Utils]::arrayCharacterFormatted($vals, ", ")
+        $query += ($vals -join ", ")
 
         # Add where option on primary key
         $query += " WHERE "
         $pk = $this.primaryKey
-        $query += [Utils]::arrayCharacterFormatted(@($pk+"="+$this.$pk), '')
+        $query += $pk+"="+$this.$pk
         
         [Database]::query($query)
     }
@@ -146,7 +146,7 @@ class Entity {
     [void] delete(){
         $query = 'DELETE from '+ $this.tableName +' WHERE '
         $pk = $this.primaryKey
-        $query += [Utils]::arrayCharacterFormatted(@($pk+"="+$this.$pk), '')
+        $query += $pk+"="+$this.$pk
         [Database]::query($query)
     }
 

@@ -1,4 +1,4 @@
-Import-Module ".\src\Models\Order.ps1" -Force
+Import-Module "..\src\Models\Order.ps1" -Force
 
 Describe 'Orders Tests' {
     It 'Given no parameters, it should insert empty Order' {

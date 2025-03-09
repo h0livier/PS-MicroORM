@@ -1,4 +1,4 @@
-Import-Module ".\src\Models\User.ps1" -Force
+Import-Module "..\src\Models\User.ps1" -Force
 
 Describe 'Users Tests' {
     It 'Given no parameters, it should insert empty user' {

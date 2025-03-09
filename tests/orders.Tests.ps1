@@ -1,6 +1,4 @@
-. $PSScriptRoot\..\src\Models\Order.ps1
-
-
+. $PSScriptRoot\src\Models\Order.ps1
 
 Describe 'Orders Tests' {
     It 'Given no parameters, it should insert empty Order' {

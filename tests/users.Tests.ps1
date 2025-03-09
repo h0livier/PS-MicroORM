@@ -1,4 +1,4 @@
-Import-Module "..\src\Models\User.ps1" -Force
+. $PSScriptRoot\..\src\Models\User.ps1
 
 Describe 'Users Tests' {
     It 'Given no parameters, it should insert empty user' {

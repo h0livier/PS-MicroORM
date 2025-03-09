@@ -42,7 +42,7 @@ class Entity {
 
     <#
     .SYNOPSIS
-        Constructs a SQL select instruction
+        Executes a SQL select instruction
     .PARAMETER tableName
         Represents the queried SQL table name
     .PARAMETER attributes
@@ -52,6 +52,50 @@ class Entity {
         Can contain joins and where options
     #>
     static [object] select([string] $tableName, [array] $attributes, [hashtable] $options){
+        $query = [Entity]::generateSelectQuery($tableName, $attributes, $options)
+        $queryRes = [Database]::query($query)
+        return $queryRes
+    }
+
+    <#
+    .SYNOPSIS
+        Executes a SQL Select instruction for the entity
+    .PARAMETER options
+        Represents the options given to make the SQL instruction
+    #>
+    [void] select([hashtable]$options = @{}){
+        $object = [Entity]::select($this.tableName, $this.baseColumns, $options)
+        $this.morph($object)
+    }
+
+    <#
+    .SYNOPSIS
+        Executes a SQL Insert instruction from entity object instance
+    #>
+    [void] insert(){
+        $query = $this.generateInsertQuery()
+        [Database]::query($query)
+    }
+
+    <#
+    .SYNOPSIS
+        Executes a SQL Update instruction based on the entity object instance
+    #>
+    [void] update(){
+        $query = $this.generateUpdateQuery()
+        [Database]::query($query)
+    }
+
+    <#
+    .SYNOPSIS
+        Executes a SQL Delete instruction based on the entity object instance
+    #>
+    [void] delete(){
+        $query = $this.generateDeleteQuery()
+        [Database]::query($query)
+    }
+    
+    static [string] generateSelectQuery([string] $tableName, [array] $attributes, [hashtable] $options){
         $attributes = if($options.Keys -contains "attributes") {$options["attributes"]} else {$attributes}
         $where = if($options.Keys -contains "where") {$options["where"]} else {@()}
         $joins = if($options.Keys -contains "joins") {
@@ -67,26 +111,14 @@ class Entity {
         if($where.Count -ne 0){
             $query += " WHERE " + ($where -join " AND ")
         }
-        $queryRes = [Database]::query($query)
-        return $queryRes
+        return $query
     }
 
     <#
     .SYNOPSIS
-        Constructs a SQL select instruction for the entity
-    .PARAMETER options
-        Represents the options given to make the SQL instruction
+        Constructs a SQL Insert instruction based on the entity object instance
     #>
-    [void] select([hashtable]$options = @{}){
-        $object = [Entity]::select($this.tableName, $this.baseColumns, $options)
-        $this.morph($object)
-    }
-
-    <#
-    .SYNOPSIS
-        Constructs a SQL insert instruction from entity object instance
-    #>
-    [void] insert(){
+    [string] generateInsertQuery(){
         $query = "INSERT INTO ["+ $this.tableName +"] "
         $columns = @()
         $values = @()
@@ -106,16 +138,14 @@ class Entity {
         }
         $query += "("+($columns -join ", ")+") "
         $query += "values("+($values -join ", ")+")"
-        [Database]::query($query)
+        return $query
     }
 
     <#
     .SYNOPSIS
-        Constructs a SQL update instruction based on the entity object instance
-    .PARAMETER where
-        Represents the options used to filter on which lines the update has to be applied
+        Constructs a SQL Update instruction based on the entity object instance
     #>
-    [void] update(){
+    [string] generateUpdateQuery(){
         $query = "UPDATE ["+ $this.tableName +"] SET "
         $vals = @()
         foreach($item in $this.baseColumns){
@@ -140,15 +170,18 @@ class Entity {
         $query += " WHERE "
         $pk = $this.primaryKey
         $query += $pk+"="+$this.$pk
-        
-        [Database]::query($query)
+        return $query
     }
 
-    [void] delete(){
+    <#
+    .SYNOPSIS
+        Constructs a SQL Delete instruction based on the entity object instance
+    #>
+    [string] generateDeleteQuery(){
         $pk = $this.primaryKey
         $query = 'DELETE from ['+ $this.tableName +'] WHERE '
         $query += $pk+"="+$this.$pk
-        [Database]::query($query)
+        return $query
     }
 
 }
